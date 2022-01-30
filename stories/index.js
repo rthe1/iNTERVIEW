@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment, useState } from 'react'
 
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
@@ -18,6 +18,10 @@ import Confirm from "components/Appointment/Confirm.js";
 import Status from "components/Appointment/Status.js";
 import Error from "components/Appointment/Error.js";
 import Form from "components/Appointment/Form.js";
+
+import {getAppointmentsForDay, getInterview} from "./helpers/selector.js"
+
+
 
 
 storiesOf("Button", module)
@@ -196,15 +200,25 @@ storiesOf("Appointment", module)
     backgrounds: [{ name: "white", value: "#fff", default: true }]
   })
   .add("Appointment", () => <Appointment />)
-  .add("Appointment with Time", () => <Appointment time="12pm" />);
-
-storiesOf("Appointment", module)
-  .addParameters({
-    backgrounds: [{ name: "white", value: "#fff", default: true }]
-  })
-  .add("Appointment", () => <Appointment />)
   .add("Appointment with Time", () => <Appointment time="12pm" />)
-  .add("Header", () => <Header time="12pm" />);
+  .add("Header", () => <Header time="12pm" />)
+  .add("Appointment Empty", () => (
+    <Fragment>
+      <Appointment id={1} time="4pm" />
+      <Appointment time="5pm" />
+    </Fragment>
+  ))
+  .add("Appointment Booked", () => (
+    <Fragment>
+      <Appointment
+        id={1}
+        time="4pm"
+        interview={{ student: "Lydia Miller-Jones", interviewer }}
+      />
+      <Appointment time="5pm" />
+    </Fragment>
+  ));
+ 
 
 storiesOf("Empty", module)
   .addParameters({
@@ -249,10 +263,36 @@ storiesOf("Form", module)
   .add("Form Edit", () =>
     <Form student={"String"}
       interviewer={5}
-      interviewers={[]}
+      interviewers={interviewers}
       onSave={action("onSave")}
       onCancel={action("onCancel")} />)
   .add("Form Create", () => <Form
-    interviewers={[]}
+    interviewers={interviewers}
     onSave={action("onSave")}
     onCancel={action("onCancel")} />);
+
+    const [state, setState] = useState({
+      day: "Monday",
+      days: [],
+      appointments: {},
+      interviewers:{}
+    });
+
+    test("getInterview returns an object with the interviewer data", () => {
+      const result = getInterview(state, state.appointments["3"].interview);
+      expect(result).toEqual(
+        expect.objectContaining({
+          student: expect.any(String),
+          interviewer: expect.objectContaining({
+            id: expect.any(Number),
+            name: expect.any(String),
+            avatar: expect.any(String)
+          })
+        })
+      );
+    });
+    
+    test("getInterview returns null if no interview is booked", () => {
+      const result = getInterview(state, state.appointments["2"].interview);
+      expect(result).toBeNull();
+    });

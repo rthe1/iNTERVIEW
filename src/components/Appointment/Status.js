@@ -1,5 +1,7 @@
 import React from 'react';
 
+import Header from './Header.js';
+
 export default function Status() {
  return <main className="appointment__card appointment__card--status">
   <img

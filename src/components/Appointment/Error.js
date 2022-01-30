@@ -1,4 +1,5 @@
 import React from 'react';
+import Header from './Header.js';
 
 export default function Error() {
   return <main className="appointment__card appointment__card--error">
