@@ -17,11 +17,13 @@ export default function Show(props) {
         className="appointment__actions-button"
         src="images/edit.png"
         alt="Edit"
+        onClick={() => {props.edit()}}
       />
       <img
         className="appointment__actions-button"
         src="images/trash.png"
         alt="Delete"
+        onClick={() => {props.cancel()}}
       />
     </section>
   </section>

@@ -7,8 +7,8 @@ import DayList from "./DayList";
 // import Show from "src/components/Appointment/Show.js";
 import Appointment from './Appointment'
 import "./Application.scss";
-import {getAppointmentsForDay, getInterview, getInterviewersForDay} from "./helpers/selector.js"
-
+import { getAppointmentsForDay, getInterview, getInterviewersForDay } from "./helpers/selector.js"
+import useApplicationData from "../hooks/useApplicationData"
 // const appointments = [
 //   {
 //     id: 1,
@@ -51,42 +51,93 @@ import {getAppointmentsForDay, getInterview, getInterviewersForDay} from "./help
 
 
 export default function Application(props) {
-  
-  
-  const [state, setState] = useState({
-    day: "Monday",
-    days: [],
-    appointments: {},
-    interviewers:{}
-  });
 
-  const setDay = day => setState({ ...state, day: day });  
+  // const [state, setState] = useState({
+  //   day: "Monday",
+  //   days: [],
+  //   appointments: {},
+  //   interviewers: {}
+  // });
 
-  useEffect(() => {
-    Promise.all([
-      axios.get('http://localhost:8001/api/days'),
-      axios.get('http://localhost:8001/api/appointments'),
-      axios.get('http://localhost:8001/api/interviewers')
-    ]).then((all) => {
-      console.log(all[0]); // first
-      console.log(all[1]); // second
-      console.log(all[2]); // third
 
-      const [first, second, third] = all;
+  // const setDay = day => setState({ ...state, day: day });
 
-      const days = first.data
-      const appointments = second.data
-      const interviewers = third.data
+  // function cancelInterview(id){
 
-      setState({...state, days, appointments, interviewers  })
-     
-    })
-  }, []);
+  //   const appointment = {
+  //     ...state.appointments[id],
+  //     interview: null,
+  //   }
+
+  //   const appointments = {
+  //     ...state.appointments,
+  //     [id]: appointment
+  //   };
+
+  //   return axios.delete(`http://localhost:8001/api/appointments/${id}` )
+  //   .then(response => {
+  //     setState({ ...state, appointments })
+  //   })
+
+    
+  // }
+
+  // function bookInterview(id, interview) {
+   
+  //   const appointment = {
+  //     ...state.appointments[id],
+  //     interview: { ...interview }
+  //   };
+
+  //   const appointments = {
+  //     ...state.appointments,
+  //     [id]: appointment
+  //   };
+
+
+  //   return axios.put(`/api/appointments/${id}`, { interview })
+  //     .then(response => {
+  //       setState({ ...state, appointments })
+  //       console.log(id, interview);
+  //     })
+
+
+  // }
+
+
+  const {
+    state,
+    setDay,
+    bookInterview,
+    cancelInterview
+  } = useApplicationData();
+
+
+  // useEffect(() => {
+  //   Promise.all([
+  //     axios.get('http://localhost:8001/api/days'),
+  //     axios.get('http://localhost:8001/api/appointments'),
+  //     axios.get('http://localhost:8001/api/interviewers')
+  //   ]).then((all) => {
+  //     console.log(all[0]); // first
+  //     console.log(all[1]); // second
+  //     console.log(all[2]); // third
+
+  //     const [first, second, third] = all;
+
+  //     const days = first.data
+  //     const appointments = second.data
+  //     const interviewers = third.data
+
+  //     setState({ ...state, days, appointments, interviewers })
+
+  //   })
+  // }, []);
 
 
   const dailyAppointments = getAppointmentsForDay(state, state.day);
 
-  const interviewersForDay = getInterviewersForDay(state,state.day);
+  const interviewersForDay = getInterviewersForDay(state, state.day);
   // const dailyAppointments = [];
 
   // const renderappointment = dailyAppointments.map((appointment) => {
@@ -95,7 +146,9 @@ export default function Application(props) {
 
   const schedule = dailyAppointments.map((appointment) => {
     const interview = getInterview(state, appointment.interview);
-  console.log(`(INTERVIEW`,interview)
+    console.log(`(INTERVIEW`, interview)
+
+
     return (
       <Appointment
         key={appointment.id}
@@ -103,6 +156,8 @@ export default function Application(props) {
         time={appointment.time}
         interview={interview}
         interviewers={interviewersForDay}
+        bookInterview={bookInterview}
+        cancelInterview={cancelInterview }
       />
     );
   });
