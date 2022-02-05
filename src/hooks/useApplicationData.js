@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 
-export default function useApplicationData(){
+export default function useApplicationData() {
+
+  let spots = 0;
+
   const [state, setState] = useState({
     day: "Monday",
     days: [],
@@ -11,6 +14,34 @@ export default function useApplicationData(){
   });
 
   const setDay = day => setState({ ...state, day: day });
+
+
+  function updateSpots(newAppointments) {
+
+
+    const newDaysArray = state.days.map(eachDay => {
+      let freeSpots = 0;
+
+      for (const appointmentId of eachDay.appointments) {
+        if (!newAppointments[appointmentId].interview) {
+          freeSpots++;
+        }
+      }
+      
+      const newDayObj = { ...eachDay, spots: freeSpots }
+      return newDayObj
+    })
+
+    return newDaysArray;
+  }
+
+  // function updateSpots (){
+  //   axios.get(`http://localhost:8001/api/days`)
+  //   .then(response => {
+  //     const days = response.data
+  //     setState((prev) => ({...prev, days}))
+  //   })
+  // };
 
   function cancelInterview(id) {
 
@@ -24,9 +55,12 @@ export default function useApplicationData(){
       [id]: appointment
     };
 
+    const days = updateSpots(appointments)
+
+
     return axios.delete(`http://localhost:8001/api/appointments/${id}`)
       .then(response => {
-        setState({ ...state, appointments })
+        setState({ ...state, appointments, days })
       })
 
 
@@ -44,11 +78,13 @@ export default function useApplicationData(){
       [id]: appointment
     };
 
+    const days = updateSpots(appointments)
+
 
     return axios.put(`/api/appointments/${id}`, { interview })
       .then(response => {
-        setState({ ...state, appointments })
-        console.log(id, interview);
+        setState({ ...state, appointments, days })
+          ;
       })
   }
 
@@ -73,5 +109,5 @@ export default function useApplicationData(){
     })
   }, []);
 
-  return {state, setDay, bookInterview, cancelInterview}
+  return { state, setDay, bookInterview, cancelInterview }
 }
